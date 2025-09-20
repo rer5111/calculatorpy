@@ -4,6 +4,7 @@ import math
 
 def calculate(num):
     global output, buffer, nums, ops, calculation
+    outputbuffer = ""
     if num == "C":  # there is nothing
         buffer = ""
         nums = []
@@ -13,10 +14,16 @@ def calculate(num):
     elif num == "del":
         buffer = str(buffer)[:-1]    # i actually used the knowledge i gained (yes strings are just fancy lists)
     elif num in ["%", "/x", "√", "^2", "+/-"]:  # these operators instantly perform actions
+        if buffer == "":
+            buffer = 0
         if num == "%":
             buffer = float(buffer)/100
         elif num == "/x":
-            buffer = 1/float(buffer)
+            try:
+                buffer = 1/float(buffer)
+            except ZeroDivisionError:
+                outputbuffer = "Cannot divide by 0"
+                buffer = ""
         elif num == "√":
             buffer = math.sqrt(float(buffer))
         elif num == "^2":
@@ -40,7 +47,7 @@ def calculate(num):
             buffer = "0"
     else: # yeah its calculation time
         if buffer != "":
-            if not float(buffer) % 1:   # me when the 5.0 is actually just 5
+            if not float(buffer) % 1:   # me when I've written this code 15 lines ago
                 buffer = float(buffer)
                 buffer = int(buffer)
             nums.append(buffer)
@@ -55,14 +62,17 @@ def calculate(num):
             nums = []
             buffer = "buffer=" + calculation
             local_vars = locals()
-            exec(buffer, globals(), local_vars) # this code is absolutely horrible and you should never do this
-            buffer = local_vars["buffer"]
+            try:
+                exec(buffer, globals(), local_vars) # this code is absolutely horrible and you should never do this
+                buffer = local_vars["buffer"]
+            except ZeroDivisionError:
+                outputbuffer = "Cannot divide by 0"
+                buffer = ""
     try:
         if float(buffer) % 1 == 0:  # haha you're an integer now
             buffer = int(buffer)
     except ValueError:
         pass
-    outputbuffer = ""
     for i, numm in enumerate(nums): # enumerate is so cool and i even got to use it
         outputbuffer += str(numm)
         outputbuffer += ops[i]
